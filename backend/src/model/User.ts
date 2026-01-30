@@ -5,8 +5,8 @@ interface IUser extends Document {
   name: string;
   email: string;
   avatar?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const userSchema = new Schema<IUser>(
