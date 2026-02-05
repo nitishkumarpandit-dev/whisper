@@ -20,7 +20,7 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/message", messageRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/users", userRoutes);
 
 // Error handlers must come after all routes and other middleware can catch the error passed with next(err)
 app.use(errorHandler);
