@@ -1,6 +1,7 @@
 import type { NextFunction, Response } from "express";
 import type { AuthRequest } from "../middleware/auth";
 import Chat from "../model/chat";
+import { Types } from "mongoose";
 
 export async function getChats(
   req: AuthRequest,
@@ -9,6 +10,11 @@ export async function getChats(
 ) {
   try {
     const userId = req.userId;
+
+    if (!userId) {
+      res.status(400).json({ message: "UserId is missing" });
+      return;
+    }
 
     const chats = await Chat.find({ participants: userId })
       .populate("participants", "name email avatar")
@@ -22,7 +28,7 @@ export async function getChats(
 
       return {
         _id: chat._id,
-        participants: otherParticipants,
+        participants: otherParticipants ?? null,
         lastMessage: chat.lastMessage,
         lastMessageAt: chat.lastMessageAt,
         createdAt: chat.createdAt,
@@ -46,8 +52,12 @@ export async function getOrCreateChat(
     const { participantsId } = req.params;
 
     if (!userId || !participantsId) {
-      res.status(401).json({ message: "UserId and ParticipantsId missing" });
+      res.status(400).json({ message: "UserId and ParticipantsId missing" });
       return;
+    }
+
+    if (userId === participantsId) {
+      res.status(400).json({ message: "Cannot create chat with yourself" });
     }
 
     // check if chat already exist
