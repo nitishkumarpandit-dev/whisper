@@ -60,9 +60,17 @@ export const initilizeServer = (httpServer: httpServer) => {
     // Notify other that this user is currently online
     socket.broadcast.emit("online-user", { userId });
 
-    socket.join(`user ${userId}`);
+    socket.join(`user: ${userId}`);
 
-    socket.on("join-chat", (chatId: string) => {
+    socket.on("join-chat", async (chatId: string) => {
+      const chat = await Chat.findOne({
+        _id: chatId,
+        participants: userId,
+      });
+      if (!chat) {
+        socket.emit("socket-error", { message: "chat not found" });
+        return;
+      }
       socket.join(`user: ${chatId}`);
     });
 
@@ -95,7 +103,7 @@ export const initilizeServer = (httpServer: httpServer) => {
 
           chat.lastMessage = message._id;
           chat.lastMessageAt = new Date();
-          chat.save();
+          await chat.save();
 
           await message.populate("sender", "name email avatar");
 
